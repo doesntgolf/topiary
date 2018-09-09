@@ -71,6 +71,7 @@ const builtin_source_list = require(`${destination}/builtin_sources`).source_lis
 const source_list = require(`${destination}/sources`).source_list;
 fs.writeFileSync(`${destination}/sources.json`, JSON.stringify(builtin_source_list.concat(source_list)));
 fs.unlinkSync(`${destination}/sources.js`);
+fs.unlinkSync(`${destination}/builtin_sources.js`);
 
 
 // copy assets over
