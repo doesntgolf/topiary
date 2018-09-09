@@ -1,0 +1,45 @@
+{
+  "name": "topiary",
+  "description": "A meta-search engine.",
+  "version": "0.2.0",
+  "author": "Nate Dobbins <nated@posteo.net>",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "compile": "tsc",
+    "test": "jest",
+    "bundle": "rollup -c && node bundler.js",
+    "build": "yarn run compile && yarn run bundle",
+    "clean": "rm -r bundled/ compiled/"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "none",
+    "bracketSpacing": false,
+    "arrowParens": "always"
+  },
+  "dependencies": {
+    "jmespath": "^0.15.0",
+    "lunr": "^2.3.0",
+    "mithril": "^1.1.6",
+    "mustache": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.59",
+    "@types/es6-promise": "^3.3.0",
+    "@types/jmespath": "^0.15.0",
+    "@types/mithril": "^1.1.12",
+    "@types/mustache": "^0.8.31",
+    "jest": "^23.2.0",
+    "prettier": "^1.10.2",
+    "rollup": "^0.63.5",
+    "rollup-plugin-commonjs": "^9.1.4",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-pathmodify": "^1.0.1",
+    "tslint": "^5.9.1",
+    "typescript": "^3.0.1"
+  }
+}

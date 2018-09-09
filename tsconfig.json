@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./compiled",
+        "target": "ES5",
+        "noImplicitAny": false, // some Results stuff fails with true
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "lib": ["es6", "es2015.core", "es2015.promise", "es2016", "dom", "es2017"]
+    },
+    "moduleResolution": "node"
+}
