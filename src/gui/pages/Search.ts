@@ -2,7 +2,7 @@ import * as m from "mithril";
 import * as stream from "mithril/stream";
 import {Stream} from "mithril/stream";
 
-import {Query, Face, Status, Results, Message, MsgMethod, MsgObject, Follow, SavedQuery, PortMessage, PortObject, SourceID} from "../../schema";
+import {Query, Face, Status, Results, Message, MsgMethod, MsgObject, SavedQuery, PortMessage, PortObject, SourceID} from "../../schema";
 import {set_title} from "../../utils";
 
 import {ResultFormats} from "../includes/ResultFormats";
@@ -165,23 +165,7 @@ export const Search: m.FactoryComponent<{
                                         }
                                     }, console.log)
                                 }
-                            }, "Save query"),
-                            m("a.button", {
-                                onclick: (e) => {
-                                    chrome.runtime.sendMessage(<Message>{
-                                        method: MsgMethod.Create,
-                                        object: MsgObject.Follows,
-                                        args: <Follow>{
-                                            name: String( attrs.query().fields.phrase ? attrs.query().fields.phrase.value : Date.now() ),
-                                            query: attrs.query(),
-                                            face: attrs.face(),
-                                            request_interval: 10,
-                                            unseen: [],
-                                            seen: []
-                                        }
-                                    }, console.log)
-                                }
-                            }, "Follow search")
+                            }, "Save query")
                         ])
                     ]
                     : null

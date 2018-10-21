@@ -428,7 +428,6 @@ export const enum MsgMethod {
 }
 export const enum MsgObject {
     Preferences,
-    Follows,
     SavedQueries,
     Tags,
     Sources,
@@ -442,7 +441,6 @@ export interface Message {
 
 export const enum PortObject {
     Query,
-    FollowQuery,
     PlaygroundQuery
 }
 export interface PortMessage {
@@ -481,13 +479,6 @@ export interface SavedQuery {
     name: string;
     query: Query;
     face: Face;
-}
-export interface Follow extends SavedQuery {
-    request_interval: number;
-    last_updated?: number;
-
-    unseen: Array<Result>;
-    seen: Array<Result>;
 }
 
 

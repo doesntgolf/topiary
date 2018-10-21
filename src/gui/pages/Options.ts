@@ -110,7 +110,7 @@ export const Options: m.FactoryComponent<{prefs: Stream<Preferences>}> = ({attrs
 
                 m("table", [
                     m("thead", m("tr", m("th", {colspan: 2}, m("h2", "Permissions")))),
-                    m("tbody", ["history", "bookmarks", "alarms"].map(type => m("tr", [
+                    m("tbody", ["history", "bookmarks"].map(type => m("tr", [
                         m("td[align='right']", type),
                         m("td", m("a", {
                             onclick: (e) => {

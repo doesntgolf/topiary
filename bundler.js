@@ -57,7 +57,6 @@ fs.writeFileSync(`${destination}/manifest.json`, JSON.stringify({
 
   "optional_permissions": [
     "activeTab",
-    "alarms",
     "bookmarks",
     "history",
     "http://*/",

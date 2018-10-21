@@ -7,7 +7,7 @@
 
 
 import {Source, Query, Format, Status, Results, Preferences, Message, MsgMethod, MsgObject, RemoteSource, URLData, PortMessage, PortObject,
-    Result, Follow, SavedQuery, Tag, SourceTag, Data, DataKind, DataType, Protocol, Queryable, TextData, TextOutput} from "../schema";
+    Result, SavedQuery, Tag, SourceTag, Data, DataKind, DataType, Protocol, Queryable, TextData, TextOutput} from "../schema";
 import {build_url} from "../utils";
 
 import {search} from "./syndicator";
@@ -52,58 +52,6 @@ chrome.runtime.onMessage.addListener((req: Message, _, send_response) => {
             }
             break;
 
-        // Following
-        case MsgObject.Follows:
-        
-            switch(req.method) {
-                case MsgMethod.Read:
-                    let request: IDBRequest;
-                    new IDB().open([Store.Follows], "readonly", transaction => {
-                        request = transaction.objectStore(Store.Follows).getAll();
-                    })
-                    .then(() => {
-                        let list = request.result;
-                        send_response(list);
-                    })
-                    break;
-
-                case MsgMethod.Create:
-                    new IDB().open([Store.Follows], "readwrite", transaction => {
-                        transaction.objectStore(Store.Follows).add(req.args);
-                    })
-                    .then(() => {
-                        if (chrome.alarms) {
-                            chrome.alarms.create(req.args.name, {periodInMinutes: req.args.request_interval});
-                        }
-                        send_response(true);
-                    })
-                    break;
-
-                case MsgMethod.Update:
-                    new IDB().open([Store.Follows], "readwrite", transaction => {
-                        transaction.objectStore(Store.Follows).put(req.args);
-                    })
-                    .then(() => {
-                        send_response(true);
-                    })
-                    break;
-
-                case MsgMethod.Delete:
-                    new IDB().open([Store.Follows], "readwrite", transaction => {
-                        transaction.objectStore(Store.Follows).delete(req.args.name);
-                    })
-                    .then(() => {
-                        if (chrome.alarms) {
-                            chrome.alarms.clear(req.args.name);
-                        }
-                        send_response(true);
-                    })
-                    break;
-
-                default:
-                    send_response(null);
-            }
-            break;
             
         // Errors
         case MsgObject.Errors:
@@ -404,20 +352,6 @@ chrome.runtime.onConnect.addListener(port => {
                     })
             })
 
-        } else if (msg.object === PortObject.FollowQuery) {
-            follow_query(msg.args).then(() => {
-                let follows_req: IDBRequest;
-                new IDB().open([Store.Follows], "readonly", transaction => {
-                    follows_req = transaction.objectStore(Store.Follows).getAll();
-                })
-                .then(() => {
-                    port.postMessage(follows_req.result);
-                    port.disconnect();
-                })
-                .catch(() => {
-                    port.disconnect();
-                })
-            })
         } else {
             // Playground stuff
             port.disconnect();
@@ -427,56 +361,6 @@ chrome.runtime.onConnect.addListener(port => {
 
 
 
-if (chrome.alarms) {
-    chrome.alarms.onAlarm.addListener(alarm => {
-        follow_query(alarm.name);
-    })
-}
-
-function follow_query(name: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let list_req: IDBRequest;
-        let follows_req: IDBRequest;
-        new IDB().open([Store.Follows, Store.Directory], "readonly", transaction => {
-            list_req = transaction.objectStore(Store.Directory).getAll();
-            follows_req = transaction.objectStore(Store.Follows).get(name);
-        })
-        .then(() => {
-            let list = list_req.result;
-            let active = <Follow>follows_req.result;
-    
-            if (active !== undefined) {
-                let {queryables} = prepare_sources(active.query, list);
-    
-                search(active.query, queryables, [], () => {})
-                    .then((results: Results): Results => {
-                        results.list = results.list.filter(result => {
-                            return result.mapping.identifier === undefined || !active.unseen.some(seen_result => {
-                                return seen_result.mapping.identifier !== undefined
-                                    && (<TextData>result.mapping.identifier).value === seen_result.mapping.identifier.value;
-                            })
-                        })
-                        return results;
-                    })
-                    .then((results: Results) => {
-                        active.unseen = active.unseen.concat(results.list);
-                        active.seen = active.seen.concat(results.list);
-                        active.last_updated = Date.now();
-                        new IDB().open([Store.Follows], "readwrite", transaction => {
-                            transaction.objectStore(Store.Follows).put(active);
-                        })
-                        .then(resolve)
-                        .catch(reject)
-                    })
-                    .catch(reject)
-            } else {
-                chrome.alarms.clear(name);
-                reject();
-            }
-        })
-        .catch(reject)
-    })
-}
 
 window.onerror = console.log;
 
@@ -489,7 +373,7 @@ chrome.runtime.onInstalled.addListener(details => {
         .then((sources: Array<Source>) => {
 
             // Open database to set all initial data.
-            new IDB().open([Store.Directory, Store.Tags, Store.Follows, Store.SavedQueries, Store.Keyval], "readwrite", transaction => {
+            new IDB().open([Store.Directory, Store.Tags, Store.SavedQueries, Store.Keyval], "readwrite", transaction => {
 
                 // Set initial Preferences.
                 transaction.objectStore(Store.Keyval).put(<Preferences>{
@@ -535,44 +419,6 @@ chrome.runtime.onInstalled.addListener(details => {
                 tags.forEach(tag => {
                     tag = index_tag(tag);
                     transaction.objectStore(Store.Tags).put(tag);
-                })
-
-                let initial_follows: Array<Follow> = [{
-                    name: "Webcomics",
-                    query: {
-                        fields: {},
-                        source_specific: [],
-                        options: {
-                            include_tags: ["comic"]
-                        },
-                        pipeline: []
-                    },
-                    face: "List",
-                    request_interval: 60,
-                    unseen: [],
-                    seen: []
-                }, {
-                    name: "Podcasts",
-                    query: {
-                        fields: {},
-                        source_specific: [],
-                        options: {
-                            include_tags: ["audio"]
-                        },
-                        pipeline: []
-                    },
-                    face: "List",
-                    request_interval: 60,
-                    unseen: [],
-                    seen: []
-                }]
-
-                initial_follows.forEach(follow => {
-                    transaction.objectStore(Store.Follows).put(follow);
-
-                    if (chrome.alarms) {
-                        chrome.alarms.create(follow.name, {periodInMinutes: follow.request_interval});
-                    }
                 })
 
                 let saved_queries: Array<SavedQuery> = [{

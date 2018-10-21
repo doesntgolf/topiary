@@ -16,7 +16,6 @@ import {SourceEditor} from "./pages/SourceEditor";
 import {About} from "./pages/About";
 import {Guide} from "./pages/Guide";
 import {SavedQueries} from "./pages/SavedQueries";
-import {Following} from "./pages/Following";
 import {Playground} from "./pages/Playground";
 import {TagIndex} from "./pages/TagIndex";
 import {TagDetail} from "./pages/TagDetail";
@@ -30,7 +29,7 @@ import {QueryForm} from "./includes/QueryForm";
 
 
 const Layout: m.FactoryComponent<{
-    page: "home"|"search"|"following"|"directory"|"about"|"guide"|"saved"|"tags"|"playground"|"options"|"stats"|"",
+    page: "home"|"search"|"directory"|"about"|"guide"|"saved"|"tags"|"playground"|"options"|"stats"|"",
     header: m.Children
 }> = () => ({
     view: ({attrs, children}) => [
@@ -41,7 +40,6 @@ const Layout: m.FactoryComponent<{
 
             m("nav", [
                 {name: "Search", path: "/", keys: ["search", "home"]},
-                {name: "Following", path: "/following", keys: ["following"]},
                 {name: "Directory", path: "/directory", keys: ["directory"]}
             ].map(page => m("a", {
                 href: page.path,
@@ -285,13 +283,6 @@ m.route(document.body, "/", {
         render: (vnode) => m(Layout, {
             page: "saved",
             header: m("h1", "Saved queries")
-        }, vnode)
-    },
-    "/following": {
-        onmatch: () => Following,
-        render: (vnode) => m(Layout, {
-            page: "following",
-            header: m("h1", "Following")
         }, vnode)
     },
     "/tags": {

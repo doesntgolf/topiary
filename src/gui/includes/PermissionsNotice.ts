@@ -11,14 +11,13 @@ export const PermissionsNotice: m.FactoryComponent = () => {
         all_origins: false,
         bookmarks: false,
         history: false,
-        alarms: false,
         //activeTab: false
     }
 
     permissions.map((value) => {
         accessible.all_origins = (["http://*/*", "https://*/*"].every(origin => value.origins.includes(origin)));
 
-        ["bookmarks", "history", "alarms"/*, "activeTab"*/].forEach(key => {
+        ["bookmarks", "history"/*, "alarms", "activeTab"*/].forEach(key => {
             accessible[key] = value.permissions.includes(key);
         })
 
@@ -77,22 +76,9 @@ export const PermissionsNotice: m.FactoryComponent = () => {
                         }
                     }, "browsing history")) : null,
                     !accessible.bookmarks && !accessible.history ? ". These are used as primary search sources." : ". This is used as a primary search source."
-                ]) : null,
-
-                !accessible.alarms ? m("li", [
-                    "Grant access to ",
-                    m("b", m("a", {
-                        onclick: (e) => {
-                            e.redraw = false;
-                            request_permission({permissions: ["alarms"]})
-                        }
-                    }, "set timers and alarms")),
-                    ". This is used for automatically checking for updates from remote directories, and for automatically compiling data from a source over time. See the ",
-                    m("a", {href: "/following", oncreate: m.route.link}, "following page"),
-                    " for more information."
-                ]) : null,
+                ]) : null
             ]),
-            
+          
             m("p", {style: "margin-bottom: 0;"}, "Thanks for trying Topiary!")
         ])
     }
